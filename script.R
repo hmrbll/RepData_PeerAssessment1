@@ -64,5 +64,7 @@ agg_data <- selected_data %>%
 #Barplot of number of steps taken each day
 ggplot(data = agg_data, aes(x = date, y = total_steps)) +
         geom_bar(stat = "identity", fill = "cyan", color = "black", alpha = 0.5) +
-                labs(x = "Date", y = "Steps", title = "Number of steps taken by day") + 
+                labs(x = "Date", y = "Steps", title = "Number of steps taken by day w/o NAs") + 
                         theme(plot.title = element_text(hjust = 0.5), axis.text.x = element_blank())
+
+# 8. Panel plot comparing the average number of steps taken per 5-minute interval across weekdays and weekends
