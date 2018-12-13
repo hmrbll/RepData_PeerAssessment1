@@ -68,3 +68,39 @@ ggplot(data = agg_data, aes(x = date, y = total_steps)) +
                         theme(plot.title = element_text(hjust = 0.5), axis.text.x = element_blank())
 
 # 8. Panel plot comparing the average number of steps taken per 5-minute interval across weekdays and weekends
+
+wdays <- c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday")
+wends <- c("Saturday", "Sunday")
+
+wday_activity <- activity %>%
+        filter(weekdays(date) %in% wdays)
+
+wend_activity <- activity %>%
+        filter(weekdays(date) %in% wends)
+
+selected_wday <- wday_activity %>%
+        select(interval, steps)
+
+agg_wday <- selected_wday %>%
+        group_by(interval) %>%
+                summarise(average_steps_wday = mean(steps, na.rm = TRUE))
+
+selected_wend <- wend_activity %>%
+        select(interval, steps)
+
+agg_wend <- selected_wend %>%
+        group_by(interval) %>%
+        summarise(average_steps_wend = mean(steps, na.rm = TRUE))
+
+agg_data <- merge(agg_wday, agg_wend, by.x = "interval", by.y = "interval")
+
+plot_wday <- ggplot(data = agg_data, aes(x = interval, y = average_steps_wday)) +
+        geom_line() +
+                labs(x = "Interval", y = " Average Steps")
+
+plot_wend <- ggplot(data = agg_data, aes(x = interval, y = average_steps_wend)) +
+        geom_line() +
+                labs(x = "Interval", y = " Average Steps")
+
+library(gridExtra)
+grid.arrange(plot_wday, plot_wend, ncol = 2)
