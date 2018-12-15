@@ -1,74 +1,128 @@
-# 1. Code for reading in the dataset and/or processing the data
+---
+title: "Reproducible Research: Peer Assessment 1"
+output: 
+  html_document:
+    keep_md: true
+---
 
-#Unzip data file
+
+## Loading and preprocessing the data
+
+Unzip data file and read it as data frame 'activity'
+
+```{r, results = 'hide'}
 unzip("activity.zip")
-#Read file
 activity <- read.csv("activity.csv", stringsAsFactors = FALSE)
 activity$date <- as.Date(activity$date)
+```
 
-# 2. Histogram of the total number of steps taken each day
+Take a look at 'activity'
+```{r}
+head(activity)
+```
 
-#Aggregate data for number of steps taken each day
+## What is mean total number of steps taken per day?
+
+Aggregate data for number of steps taken each day
+
+```{r, results = 'hide', message = FALSE, warning = FALSE}
 library(dplyr)
 selected_data <- activity %>%
         select(date, steps)
 agg_data <- selected_data %>%
         group_by(date) %>%
                 summarise(total_steps = sum(steps))
-#Barplot of number of steps taken each day
+```
+
+### Barplot of number of steps taken each day
+
+```{r, message = FALSE, warning = FALSE}
 library(ggplot2)
 ggplot(data = agg_data, aes(x = date, y = total_steps)) +
         geom_bar(stat = "identity", fill = "cyan", color = "black", alpha = 0.5) +
                 labs(x = "Date", y = "Steps", title = "Number of steps taken by day") + 
                         theme(plot.title = element_text(hjust = 0.5))
+```
 
-# 3. Mean and median number of steps taken each day
+### Average number of steps for each day
 
+```{r, results = 'hide'}
 selected_data <- activity %>%
         select(date, steps)
 agg_data <- selected_data %>%
         group_by(date) %>%
                 summarise(mean_steps = mean(steps, na.rm = TRUE), median_steps = median(steps, na.rm = TRUE))
+agg_data$date <- as.character(agg_data$date)
+```
 
-# 4. Time series plot of the average number of steps taken
+Print as a table
 
+```{r, message = FALSE, results = 'asis'}
+library(xtable)
+print(xtable(agg_data), type = "html")
+```
+
+## What is the average daily activity pattern?
+
+Aggregate average number of steps per day
+
+```{r, results = 'hide'}
 selected_data <- activity %>%
         select(date, steps)
 agg_data <- selected_data %>%
         group_by(date) %>%
                 summarise(mean_steps = mean(steps, na.rm = TRUE))
+```
+
+Plot time series
+             
+```{r, message = FALSE, warning = FALSE}
 ggplot(data = agg_data, aes(x = date, y = mean_steps)) +
         geom_line(color = "blue") +
                 labs(x = "Date", y = "Average number of steps", title = "Time series of average number of steps") +
                         theme(plot.title = element_text(hjust = 0.5))
+``` 
 
-# 5. The 5-minute interval that, on average, contains the maximum number of steps
+### The 5-minute interval that, on average, contains the maximum number of steps
 
+```{r}
 selected_data <- activity %>%
         filter(steps == max(steps, na.rm = TRUE)) %>%
                 select(date, interval)
+selected_data
+```
 
-# 6. Code to describe and show a strategy for imputing missing data
+## Imputing missing values
 
+```{r}
 imputed_data <- activity[complete.cases(activity), ]
+```
 
-# 7. Histogram of the total number of steps taken each day after missing values are imputed
+### Histogram of the total number of steps taken each day after missing values are imputed
 
-#Aggregate data for number of steps taken each day
+Aggregate data for number of steps taken each day
+
+```{r}
 imputed_data$date <- as.character(imputed_data$date)
 selected_data <- imputed_data %>%
         select(date, steps)
 agg_data <- selected_data %>%
         group_by(date) %>%
                 summarise(total_steps = sum(steps))
-#Barplot of number of steps taken each day
+```
+
+Barplot of number of steps taken each day
+
+```{r, message = FALSE, warning = FALSE}
 ggplot(data = agg_data, aes(x = date, y = total_steps)) +
         geom_bar(stat = "identity", fill = "cyan", color = "black", alpha = 0.5) +
                 labs(x = "Date", y = "Steps", title = "Number of steps taken by day w/o NAs") + 
                         theme(plot.title = element_text(hjust = 0.5), axis.text.x = element_blank())
+```
 
-# 8. Panel plot comparing the average number of steps taken per 5-minute interval across weekdays and weekends
+## Are there differences in activity patterns between weekdays and weekends?
 
+```{r, message = FALSE, warning = FALSE}
 wdays <- c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday")
 wends <- c("Saturday", "Sunday")
 
@@ -106,3 +160,4 @@ plot_wend <- ggplot(data = agg_data, aes(x = interval, y = average_steps_wend)) 
 
 library(gridExtra)
 grid.arrange(plot_wday, plot_wend, ncol = 2)
+```
